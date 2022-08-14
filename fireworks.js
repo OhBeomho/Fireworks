@@ -29,7 +29,7 @@ reset.addEventListener('click', () => {
 });
 
 gravityInput.addEventListener('change', () => {
-	gravity = parseInt(gravityInput.value);
+	gravity = Number(gravityInput.value);
 });
 
 velocityInput.addEventListener('change', () => {
