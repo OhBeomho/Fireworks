@@ -33,11 +33,11 @@ gravityInput.addEventListener('change', () => {
 });
 
 velocityInput.addEventListener('change', () => {
-	fireworkVelocity = parseInt(velocityInput.value);
+	fireworkVelocity = Number(velocityInput.value);
 });
 
 sizeInput.addEventListener('change', () => {
-	fireworkSize = parseInt(sizeInput.value);
+	fireworkSize = Number(sizeInput.value);
 });
 
 const g = new PIXI.Graphics();
