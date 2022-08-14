@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Fireworks</title>
+		<style>
+			@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100&display=swap');
+
+			* {
+				font-family: 'Noto Sans KR', sans-serif;
+			}
+
+			html,
+			body {
+				margin: 0;
+			}
+
+			canvas {
+				display: block;
+			}
+
+			.container {
+				position: absolute;
+				padding: 10px;
+			}
+
+			.container.top {
+				top: 0;
+			}
+
+			.container.left {
+				left: 0;
+			}
+
+			.container.bottom {
+				bottom: 0;
+			}
+
+			.container.right {
+				right: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container top left">
+			Gravity: <input type="number" id="gravity" value="0.2"><br>
+			Firework velocity: <input type="number" id="velocity" value="18"><br>
+			Firework size(radius): <input type="number" id="size" value="15"><br>
+			<button type="button" id="reset">Reset Settings</button>
+		</div>
+		<div class="container bottom right">
+			Used pixi.js to this website.<br />
+			License: MIT License<br />
+			Link: <a href="https://pixijs.com" target="_blank">pixijs.com</a>
+		</div>
+		<canvas id="canvas"></canvas>
+		<script src="https://pixijs.download/v6.5.1/pixi.js"></script>
+		<script src="./fireworks.js"></script>
+	</body>
+</html>
