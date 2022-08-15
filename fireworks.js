@@ -12,11 +12,15 @@ const subFireworks = [];
 const gravityInput = document.getElementById('gravity');
 const velocityInput = document.getElementById('velocity');
 const sizeInput = document.getElementById('size');
+const delayInput = document.getElementById('delay');
+const explodeToggle = document.getElementById('explode');
 const reset = document.getElementById('reset');
 
-let gravity = 0.2;
-let fireworkVelocity = 18;
-let fireworkSize = 15;
+let gravity = Number(gravityInput.value);
+let fireworkVelocity = Number(velocityInput.value);
+let fireworkSize = Number(sizeInput.value);
+let fireworkDelay = Number(delayInput.value);
+let mouseExplode = explodeToggle.checked;
 let mouseX = 0;
 let mouseY = 0;
 
@@ -24,11 +28,26 @@ reset.addEventListener('click', () => {
 	gravity = 0.2;
 	fireworkVelocity = 18;
 	fireworkSize = 15;
+	fireworkDelay = 1;
+	mouseExplode = true;
+
+	if (!mouseExplode) {
+		app.stage.removeChild(mouseCircle);
+	} else {
+		app.stage.addChild(mouseCircle);
+	}
 
 	gravityInput.value = gravity;
 	velocityInput.value = fireworkVelocity;
 	sizeInput.value = fireworkSize;
+	delayInput.value = fireworkDelay;
+	explodeToggle.checked = mouseExplode;
 });
+
+const mouseCircle = new PIXI.Graphics();
+if (mouseExplode) {
+	app.stage.addChild(mouseCircle);
+}
 
 gravityInput.addEventListener('change', () => {
 	gravity = Number(gravityInput.value);
@@ -42,8 +61,19 @@ sizeInput.addEventListener('change', () => {
 	fireworkSize = Number(sizeInput.value);
 });
 
-const g = new PIXI.Graphics();
-app.stage.addChild(g);
+delayInput.addEventListener('change', () => {
+	fireworkDelay = Number(delayInput.value);
+});
+
+explodeToggle.addEventListener('change', () => {
+	mouseExplode = explodeToggle.checked;
+
+	if (!mouseExplode) {
+		app.stage.removeChild(mouseCircle);
+	} else {
+		app.stage.addChild(mouseCircle);
+	}
+});
 
 class Firework {
 	constructor(x, y, velocity) {
@@ -53,9 +83,19 @@ class Firework {
 		this.color = Math.floor(Math.random() * 0xffffff);
 		this.alpha = 1;
 		this.addSize = 0;
+		this.g = new PIXI.Graphics();
+		app.stage.addChild(this.g);
 	}
 
 	draw() {
+		this.g.clear();
+
+		this.g.beginFill(this.color, this.alpha);
+		this.g.drawCircle(this.x, this.y, fireworkSize + this.addSize);
+		this.g.endFill();
+	}
+
+	update() {
 		if (this.explode) {
 			this.alpha -= 0.07;
 			this.addSize += 10;
@@ -64,14 +104,9 @@ class Firework {
 
 		if (this.alpha <= 0) {
 			fireworks.splice(fireworks.indexOf(this), 1);
+			app.stage.removeChild(this.g);
 		}
 
-		g.beginFill(this.color, this.alpha);
-		g.drawCircle(this.x, this.y, fireworkSize + this.addSize);
-		g.endFill();
-	}
-
-	update() {
 		if (!this.explode) {
 			this.y -= this.velocity;
 			this.velocity -= gravity;
@@ -83,7 +118,7 @@ class Firework {
 			mouseY + 50 >= this.y - fireworkSize &&
 			mouseY - 50 <= this.y + fireworkSize;
 
-		if (this.velocity <= 0 || this.y <= 0 || mouseTouch) {
+		if (this.velocity <= 0 || this.y <= 0 || (mouseTouch && mouseExplode)) {
 			this.explode = true;
 		}
 	}
@@ -97,12 +132,15 @@ class SubFirework {
 		this.vVelocity = vVelocity;
 		this.color = color;
 		this.alpha = 1;
+		this.g = new PIXI.Graphics();
+		app.stage.addChild(this.g);
 	}
 
 	draw() {
-		g.beginFill(this.color, this.alpha);
-		g.drawCircle(this.x, this.y, fireworkSize / 2);
-		g.endFill();
+		this.g.clear();
+		this.g.beginFill(this.color, this.alpha);
+		this.g.drawCircle(this.x, this.y, fireworkSize / 2);
+		this.g.endFill();
 	}
 
 	update() {
@@ -120,6 +158,7 @@ class SubFirework {
 
 		if (this.alpha <= 0) {
 			subFireworks.splice(subFireworks.indexOf(this), 1);
+			app.stage.removeChild(this.g);
 		}
 	}
 }
@@ -148,19 +187,19 @@ app.renderer.plugins.interaction.on('pointermove', (e) => {
 
 let delta = 0;
 const animate = () => {
-	g.clear();
+	mouseCircle.clear();
+	mouseCircle.beginFill(0xffffff, 0.2);
+	mouseCircle.drawCircle(mouseX, mouseY, 50);
+	mouseCircle.endFill();
 
-	g.beginFill(0xffffff, 0.2);
-	g.drawCircle(mouseX, mouseY, 50);
-
-	if (delta > 1) {
+	if (delta > fireworkDelay) {
 		fireworks.push(
 			new Firework(Math.floor(Math.random() * app.renderer.width), app.renderer.height, fireworkVelocity)
 		);
 		delta = 0;
 	}
 
-	delta += 0.012;
+	delta += 0.01;
 
 	for (let firework of fireworks) {
 		firework.draw();
