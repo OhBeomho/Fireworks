@@ -26,7 +26,7 @@ let mouseY = 0;
 reset.addEventListener('click', () => {
 	gravity = 0.2;
 	fireworkSize = 15;
-	fireworkDelay = 0.5;
+	fireworkDelay = 1;
 	mouseExplode = false;
 
 	if (!mouseExplode) {
