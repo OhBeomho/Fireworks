@@ -99,7 +99,7 @@ class Firework {
 		if (this.explode) {
 			this.alpha -= 0.07;
 			this.addSize += 10;
-			createSubFireworks(this.x + Math.sin(this.addSize) * 5, this.y + Math.sin(this.addSize) * 5, this.color);
+			createSubFireworks(this.x, this.y, this.color);
 		}
 
 		if (this.alpha <= 0) {
@@ -146,7 +146,7 @@ class SubFirework {
 	update() {
 		this.x += this.hVelocity;
 		this.y += this.vVelocity;
-		this.alpha -= 0.015;
+		this.alpha -= 0.03;
 
 		if (this.hVelocity > 0) {
 			this.hVelocity -= 0.1;
@@ -164,20 +164,15 @@ class SubFirework {
 }
 
 const createSubFireworks = (x, y, color) => {
-	subFireworks.push(
-		new SubFirework(x, y, -fireworkVelocity / 2, -fireworkVelocity / 2, color),
-		new SubFirework(x, y, -fireworkVelocity / 2, 0, color),
-		new SubFirework(x, y, -fireworkVelocity / 2, fireworkVelocity / 2, color),
-		new SubFirework(x, y, fireworkVelocity / 2, -fireworkVelocity / 2, color),
-		new SubFirework(x, y, fireworkVelocity / 2, 0, color),
-		new SubFirework(x, y, fireworkVelocity / 2, fireworkVelocity / 2, color),
-		new SubFirework(x, y, -fireworkVelocity / 3, -fireworkVelocity / 3, color),
-		new SubFirework(x, y, -fireworkVelocity / 3, 0, color),
-		new SubFirework(x, y, -fireworkVelocity / 3, fireworkVelocity / 3, color),
-		new SubFirework(x, y, fireworkVelocity / 3, -fireworkVelocity / 3, color),
-		new SubFirework(x, y, fireworkVelocity / 3, 0, color),
-		new SubFirework(x, y, fireworkVelocity / 3, fireworkVelocity / 3, color)
-	);
+	for (let i = 1; i <= 6; i++) {
+		subFireworks.push(
+			new SubFirework(x, y, -Math.sin(i) * 12, Math.sin(i) * 10, color),
+			new SubFirework(x, y, Math.sin(i) * 12, Math.sin(i) * 10, color),
+			new SubFirework(x, y, -Math.sin(i * 5) * 10, Math.sin(i) * 13, color),
+			new SubFirework(x, y, Math.sin(i * 5) * 10, Math.sin(i) * 13, color),
+			new SubFirework(x, y, Math.sin(i) * 15, 0, color)
+		);
+	}
 };
 
 app.renderer.plugins.interaction.on('pointermove', (e) => {
