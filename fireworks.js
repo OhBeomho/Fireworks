@@ -189,7 +189,6 @@ const animate = () => {
 			)
 		);
 		delta = 0;
-		fps = app.ticker.FPS;
 	}
 
 	delta += 1;
