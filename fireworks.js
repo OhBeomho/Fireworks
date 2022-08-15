@@ -2,7 +2,8 @@ const canvas = document.getElementById('canvas');
 const app = new PIXI.Application({
 	width: window.innerWidth,
 	height: window.innerHeight,
-	view: canvas
+	view: canvas,
+	antialias: true
 });
 
 const fireworks = [];
