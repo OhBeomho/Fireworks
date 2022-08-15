@@ -2,8 +2,7 @@ const canvas = document.getElementById('canvas');
 const app = new PIXI.Application({
 	width: window.innerWidth,
 	height: window.innerHeight,
-	view: canvas,
-	backgroundColor: 0xefefef
+	view: canvas
 });
 
 const fireworks = [];
@@ -17,6 +16,8 @@ const reset = document.getElementById('reset');
 let gravity = 0.2;
 let fireworkVelocity = 18;
 let fireworkSize = 15;
+let mouseX = 0;
+let mouseY = 0;
 
 reset.addEventListener('click', () => {
 	gravity = 0.2;
@@ -53,15 +54,11 @@ class Firework {
 		this.addSize = 0;
 	}
 
-	fire() {
-		createSubFireworks(this.x, this.y, this.color);
-		this.explode = true;
-	}
-
 	draw() {
 		if (this.explode) {
-			this.alpha -= 0.05;
+			this.alpha -= 0.07;
 			this.addSize += 10;
+			createSubFireworks(this.x + Math.sin(this.addSize) * 5, this.y + Math.sin(this.addSize) * 5, this.color);
 		}
 
 		if (this.alpha <= 0) {
@@ -74,12 +71,19 @@ class Firework {
 	}
 
 	update() {
-		this.y -= this.velocity;
-		this.velocity -= gravity;
+		if (!this.explode) {
+			this.y -= this.velocity;
+			this.velocity -= gravity;
+		}
 
-		if (this.velocity <= 0 || this.y <= 0) {
-			this.fire();
-			console.log('fire!');
+		const mouseTouch =
+			mouseX + 50 >= this.x - fireworkSize &&
+			mouseX - 50 <= this.x + fireworkSize &&
+			mouseY + 50 >= this.y - fireworkSize &&
+			mouseY - 50 <= this.y + fireworkSize;
+
+		if (this.velocity <= 0 || this.y <= 0 || mouseTouch) {
+			this.explode = true;
 		}
 	}
 }
@@ -91,10 +95,11 @@ class SubFirework {
 		this.hVelocity = hVelocity;
 		this.vVelocity = vVelocity;
 		this.color = color;
+		this.alpha = 1;
 	}
 
 	draw() {
-		g.beginFill(this.color);
+		g.beginFill(this.color, this.alpha);
 		g.drawCircle(this.x, this.y, fireworkSize / 2);
 		g.endFill();
 	}
@@ -102,6 +107,7 @@ class SubFirework {
 	update() {
 		this.x += this.hVelocity;
 		this.y += this.vVelocity;
+		this.alpha -= 0.015;
 
 		if (this.hVelocity > 0) {
 			this.hVelocity -= 0.1;
@@ -111,7 +117,7 @@ class SubFirework {
 
 		this.vVelocity += gravity;
 
-		if (this.y > app.renderer.height) {
+		if (this.alpha <= 0) {
 			subFireworks.splice(subFireworks.indexOf(this), 1);
 		}
 	}
@@ -134,9 +140,17 @@ const createSubFireworks = (x, y, color) => {
 	);
 };
 
+app.renderer.plugins.interaction.on('pointermove', (e) => {
+	mouseX = e.data.global.x;
+	mouseY = e.data.global.y;
+});
+
 let delta = 0;
 const animate = () => {
 	g.clear();
+
+	g.beginFill(0xffffff, 0.2);
+	g.drawCircle(mouseX, mouseY, 50);
 
 	if (delta > 1) {
 		fireworks.push(
