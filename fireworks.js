@@ -173,13 +173,14 @@ app.renderer.plugins.interaction.on('pointermove', (e) => {
 });
 
 let delta = 0;
+let fps = app.ticker.FPS;
 const animate = () => {
 	mouseCircle.clear();
 	mouseCircle.beginFill(0xffffff, 0.2);
 	mouseCircle.drawCircle(mouseX, mouseY, 50);
 	mouseCircle.endFill();
 
-	if (delta > fireworkDelay) {
+	if (delta >= fireworkDelay * fps) {
 		fireworks.push(
 			new Firework(
 				Math.floor(Math.random() * app.renderer.width),
@@ -188,9 +189,10 @@ const animate = () => {
 			)
 		);
 		delta = 0;
+		fps = app.ticker.FPS;
 	}
 
-	delta += 0.01;
+	delta += 1;
 
 	for (let firework of fireworks) {
 		firework.draw();
