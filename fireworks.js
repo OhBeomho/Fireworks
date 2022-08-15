@@ -10,14 +10,13 @@ const fireworks = [];
 const subFireworks = [];
 
 const gravityInput = document.getElementById('gravity');
-const velocityInput = document.getElementById('velocity');
 const sizeInput = document.getElementById('size');
 const delayInput = document.getElementById('delay');
 const explodeToggle = document.getElementById('explode');
 const reset = document.getElementById('reset');
 
+const fireworkVelocity = 18;
 let gravity = Number(gravityInput.value);
-let fireworkVelocity = Number(velocityInput.value);
 let fireworkSize = Number(sizeInput.value);
 let fireworkDelay = Number(delayInput.value);
 let mouseExplode = explodeToggle.checked;
@@ -26,10 +25,9 @@ let mouseY = 0;
 
 reset.addEventListener('click', () => {
 	gravity = 0.2;
-	fireworkVelocity = 18;
 	fireworkSize = 15;
-	fireworkDelay = 1;
-	mouseExplode = true;
+	fireworkDelay = 0.5;
+	mouseExplode = false;
 
 	if (!mouseExplode) {
 		app.stage.removeChild(mouseCircle);
@@ -38,7 +36,6 @@ reset.addEventListener('click', () => {
 	}
 
 	gravityInput.value = gravity;
-	velocityInput.value = fireworkVelocity;
 	sizeInput.value = fireworkSize;
 	delayInput.value = fireworkDelay;
 	explodeToggle.checked = mouseExplode;
@@ -51,10 +48,6 @@ if (mouseExplode) {
 
 gravityInput.addEventListener('change', () => {
 	gravity = Number(gravityInput.value);
-});
-
-velocityInput.addEventListener('change', () => {
-	fireworkVelocity = Number(velocityInput.value);
 });
 
 sizeInput.addEventListener('change', () => {
@@ -89,7 +82,6 @@ class Firework {
 
 	draw() {
 		this.g.clear();
-
 		this.g.beginFill(this.color, this.alpha);
 		this.g.drawCircle(this.x, this.y, fireworkSize + this.addSize);
 		this.g.endFill();
@@ -146,7 +138,7 @@ class SubFirework {
 	update() {
 		this.x += this.hVelocity;
 		this.y += this.vVelocity;
-		this.alpha -= 0.03;
+		this.alpha -= rand(0.02, 0.08);
 
 		if (this.hVelocity > 0) {
 			this.hVelocity -= 0.1;
@@ -189,7 +181,11 @@ const animate = () => {
 
 	if (delta > fireworkDelay) {
 		fireworks.push(
-			new Firework(Math.floor(Math.random() * app.renderer.width), app.renderer.height, fireworkVelocity)
+			new Firework(
+				Math.floor(Math.random() * app.renderer.width),
+				app.renderer.height,
+				rand(fireworkVelocity / 2, fireworkVelocity)
+			)
 		);
 		delta = 0;
 	}
@@ -207,6 +203,8 @@ const animate = () => {
 	}
 };
 app.ticker.add(animate);
+
+const rand = (min, max) => Math.random() * (max - min) + min;
 
 window.addEventListener('resize', () => {
 	app.renderer.resize(window.innerWidth, window.innerHeight);
