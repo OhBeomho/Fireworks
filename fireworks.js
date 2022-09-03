@@ -1,10 +1,9 @@
 const canvas = document.getElementById('canvas');
-const app = new PIXI.Application({
-	width: window.innerWidth,
-	height: window.innerHeight,
-	view: canvas,
-	antialias: true
-});
+const ctx = canvas.getContext('2d');
+let raf;
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
 const fireworks = [];
 const subFireworks = [];
@@ -41,11 +40,6 @@ reset.addEventListener('click', () => {
 	explodeToggle.checked = mouseExplode;
 });
 
-const mouseCircle = new PIXI.Graphics();
-if (mouseExplode) {
-	app.stage.addChild(mouseCircle);
-}
-
 gravityInput.addEventListener('change', () => {
 	gravity = Number(gravityInput.value);
 });
@@ -60,12 +54,6 @@ delayInput.addEventListener('change', () => {
 
 explodeToggle.addEventListener('change', () => {
 	mouseExplode = explodeToggle.checked;
-
-	if (!mouseExplode) {
-		app.stage.removeChild(mouseCircle);
-	} else {
-		app.stage.addChild(mouseCircle);
-	}
 });
 
 class Firework {
@@ -73,18 +61,16 @@ class Firework {
 		this.x = x;
 		this.y = y;
 		this.velocity = velocity;
-		this.color = Math.floor(Math.random() * 0xffffff);
+		this.color = [rand(0, 255), rand(0, 255), rand(0, 255)];
 		this.alpha = 1;
 		this.addSize = 0;
-		this.g = new PIXI.Graphics();
-		app.stage.addChild(this.g);
 	}
 
 	draw() {
-		this.g.clear();
-		this.g.beginFill(this.color, this.alpha);
-		this.g.drawCircle(this.x, this.y, fireworkSize + this.addSize);
-		this.g.endFill();
+		ctx.fillStyle = `rgba(${this.color[0]}, ${this.color[1]}, ${this.color[2]}, ${this.alpha})`;
+		ctx.beginPath();
+		ctx.arc(this.x, this.y, fireworkSize + this.addSize, 0, 2 * Math.PI);
+		ctx.fill();
 	}
 
 	update() {
@@ -96,7 +82,6 @@ class Firework {
 
 		if (this.alpha <= 0) {
 			fireworks.splice(fireworks.indexOf(this), 1);
-			app.stage.removeChild(this.g);
 		}
 
 		if (!this.explode) {
@@ -124,15 +109,13 @@ class SubFirework {
 		this.vVelocity = vVelocity;
 		this.color = color;
 		this.alpha = 1;
-		this.g = new PIXI.Graphics();
-		app.stage.addChild(this.g);
 	}
 
 	draw() {
-		this.g.clear();
-		this.g.beginFill(this.color, this.alpha);
-		this.g.drawCircle(this.x, this.y, fireworkSize / 2);
-		this.g.endFill();
+		ctx.fillStyle = `rgba(${this.color[0]}, ${this.color[1]}, ${this.color[2]}, ${this.alpha})`;
+		ctx.beginPath();
+		ctx.arc(this.x, this.y, fireworkSize / 2, 0, 2 * Math.PI);
+		ctx.fill();
 	}
 
 	update() {
@@ -150,7 +133,6 @@ class SubFirework {
 
 		if (this.alpha <= 0) {
 			subFireworks.splice(subFireworks.indexOf(this), 1);
-			app.stage.removeChild(this.g);
 		}
 	}
 }
@@ -167,24 +149,27 @@ const createSubFireworks = (x, y, color) => {
 	}
 };
 
-app.renderer.plugins.interaction.on('pointermove', (e) => {
-	mouseX = e.data.global.x;
-	mouseY = e.data.global.y;
+window.addEventListener('mousemove', (e) => {
+	mouseX = e.clientX;
+	mouseY = e.clientY;
 });
 
 let delta = 0;
-let fps = app.ticker.FPS;
-const animate = () => {
-	mouseCircle.clear();
-	mouseCircle.beginFill(0xffffff, 0.2);
-	mouseCircle.drawCircle(mouseX, mouseY, 50);
-	mouseCircle.endFill();
+function animate() {
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-	if (delta >= fireworkDelay * fps) {
+	if (mouseExplode) {
+		ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+		ctx.beginPath();
+		ctx.arc(mouseX, mouseY, 50, 0, 2 * Math.PI);
+		ctx.fill();
+	}
+
+	if (delta >= fireworkDelay * 60) {
 		fireworks.push(
 			new Firework(
-				Math.floor(Math.random() * app.renderer.width),
-				app.renderer.height,
+				Math.floor(Math.random() * canvas.width),
+				canvas.height,
 				rand(fireworkVelocity / 2, fireworkVelocity)
 			)
 		);
@@ -202,11 +187,15 @@ const animate = () => {
 		firework.draw();
 		firework.update();
 	}
-};
-app.ticker.add(animate);
+
+	raf = window.requestAnimationFrame(animate);
+}
+
+raf = window.requestAnimationFrame(animate);
 
 const rand = (min, max) => Math.random() * (max - min) + min;
 
 window.addEventListener('resize', () => {
-	app.renderer.resize(window.innerWidth, window.innerHeight);
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
 });
