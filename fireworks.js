@@ -28,12 +28,6 @@ reset.addEventListener('click', () => {
 	fireworkDelay = 1;
 	mouseExplode = false;
 
-	if (!mouseExplode) {
-		app.stage.removeChild(mouseCircle);
-	} else {
-		app.stage.addChild(mouseCircle);
-	}
-
 	gravityInput.value = gravity;
 	sizeInput.value = fireworkSize;
 	delayInput.value = fireworkDelay;
